@@ -1,7 +1,9 @@
 <?php namespace	STS\Tunneler;
 
 use Illuminate\Support\ServiceProvider;
-use STS\Tunneler\Console\TunnelerCommand;
+use STS\Tunneler\Console\TunnelerActivateCommand;
+use STS\Tunneler\Console\TunnelerDeactivateCommand;
+use STS\Tunneler\Console\TunnelerVerifyCommand;
 use STS\Tunneler\Jobs\CreateTunnel;
 
 
@@ -45,11 +47,23 @@ class TunnelerServiceProvider extends ServiceProvider{
 
         $this->app->singleton('command.tunneler.activate',
             function ($app) {
-                return new TunnelerCommand();
+                return new TunnelerActivateCommand();
             }
         );
 
-        $this->commands('command.tunneler.activate');
+        $this->app->singleton('command.tunneler.deactivate',
+            function ($app) {
+                return new TunnelerDeactivateCommand();
+            }
+        );
+
+        $this->app->singleton('command.tunneler.verify',
+            function ($app) {
+                return new TunnelerVerifyCommand();
+            }
+        );
+
+        $this->commands(['command.tunneler.activate', 'command.tunneler.deactivate', 'command.tunneler.verify']);
     }
 
     /**
@@ -59,7 +73,7 @@ class TunnelerServiceProvider extends ServiceProvider{
      */
     public function provides()
     {
-        return ['command.tunneler.activate'];
+        return ['command.tunneler.activate', 'command.tunneler.deactivate', 'command.tunneler.verify'];
     }
 
 }
