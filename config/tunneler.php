@@ -7,6 +7,10 @@ return [
     'bash_path' => env('TUNNELER_BASH_PATH', 'bash'),
     'ssh_path' => env('TUNNELER_SSH_PATH', 'ssh'),
     'nohup_path' => env('TUNNELER_NOHUP_PATH', 'nohup'),
+    'ps_path' => env('TUNNELER_PS_PATH', 'ps'),
+    'grep_path' => env('TUNNELER_GREP_PATH', 'grep'),
+    'awk_path' => env('TUNNELER_AWK_PATH', 'awk'),
+    'xargs_path' => env('TUNNELER_XARGS_PATH', 'xargs'),
     
     'local_address' => env('TUNNELER_LOCAL_ADDRESS', '127.0.0.1'),
     'local_port' => env('TUNNELER_LOCAL_PORT'),
