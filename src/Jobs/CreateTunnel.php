@@ -1,5 +1,10 @@
 <?php namespace STS\Tunneler\Jobs;
 
+use STS\Tunneler\Events\CreatingTunnel;
+use STS\Tunneler\Events\VerifyingTunnel;
+use STS\Tunneler\Events\TunnelIsOpen;
+use STS\Tunneler\Events\TunnelIsNotOpen;
+
 class CreateTunnel
 {
 
@@ -54,6 +59,7 @@ class CreateTunnel
     public function handle(): int
     {
         if ($this->verifyTunnel()) {
+            event(new TunnelIsOpen($this));
             return 1;
         }
 
@@ -62,12 +68,16 @@ class CreateTunnel
         $tries = config('tunneler.tries');
         for ($i = 0; $i < $tries; $i++) {
             if ($this->verifyTunnel()) {
+                event(new TunnelIsOpen($this));
                 return 2;
             }
             
             // Wait a bit until next iteration
             usleep(config('tunneler.wait'));
         }
+
+
+        event(new TunnelIsNotOpen($this));
 
         throw new \ErrorException(sprintf("Could Not Create SSH Tunnel with command:\n\t%s\nCheck your configuration.",
             $this->sshCommand));
@@ -79,6 +89,8 @@ class CreateTunnel
      */
     protected function createTunnel()
     {
+        event(new CreatingTunnel($this));
+
         $this->runCommand(sprintf('%s %s >> %s 2>&1 &',
             config('tunneler.nohup_path'),
             $this->sshCommand,
@@ -94,6 +106,8 @@ class CreateTunnel
      */
     protected function verifyTunnel()
     {
+        event(new VerifyingTunnel($this));
+
         if (config('tunneler.verify_process') == 'bash') {
             return $this->runCommand($this->bashCommand);
         }

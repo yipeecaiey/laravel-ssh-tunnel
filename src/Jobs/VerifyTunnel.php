@@ -9,8 +9,10 @@ class VerifyTunnel extends CreateTunnel
     public function handle(): int
     {
         if ($this->verifyTunnel()) {
+            event(new TunnelIsOpen($this));
             return 1;
         } else {
+            event(new TunnelIsNotOpen($this));
             return 2;
         }
     }

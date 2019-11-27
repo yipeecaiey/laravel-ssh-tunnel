@@ -1,5 +1,8 @@
 <?php namespace STS\Tunneler\Jobs;
 
+use STS\Tunneler\Events\DroppingTunnel;
+use STS\Tunneler\Events\TunnelIsNotOpen;
+use STS\Tunneler\Events\TunnelIsOpen;
 
 class DropTunnel extends CreateTunnel
 {
@@ -20,6 +23,7 @@ class DropTunnel extends CreateTunnel
     public function handle(): int
     {
         if (!$this->verifyTunnel()) {
+            event(new TunnelIsNotOpen($this));
             return 1;
         }
 
@@ -28,6 +32,7 @@ class DropTunnel extends CreateTunnel
         $tries = config('tunneler.tries');
         for ($i = 0; $i < $tries; $i++) {
             if (!$this->verifyTunnel()) {
+                event(new TunnelIsNotOpen($this));
                 return 2;
             }
             
@@ -35,11 +40,14 @@ class DropTunnel extends CreateTunnel
             usleep(config('tunneler.wait'));
         }
 
+        event(new TunnelIsOpen($this));
         throw new \ErrorException(sprintf("Could Not Drop SSH Tunnel with command:\n\t%s\nCheck your configuration.",
             $this->dropCommand));
     }
 
     public function dropTunnel() {
+
+        event(new DroppingTunnel($this));
 
         $this->runCommand(sprintf('%s %s >> %s 2>&1 &',
             config('tunneler.nohup_path'),
